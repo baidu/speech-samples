@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:key="root_screen">
+
+    <PreferenceCategory
+            android:title="常用">
+        <CheckBoxPreference
+                android:defaultValue="false"
+                android:key="api"
+                android:title="使用API"
+                android:summary="可以通过两种方式使用SDK：无界面的API；有预定义界面的对话框"/>
+        <CheckBoxPreference
+                android:defaultValue="false"
+                android:key="tips_sound"
+                android:summary=""
+                android:title="提示音"/>
+
+        <ListPreference
+                android:key="nlu"
+                android:entries="@array/nlu_list"
+                android:entryValues="@array/nlu_list"
+                android:title="语义解析"
+                android:summary=""
+                android:defaultValue="@string/nlu_default"
+                android:dialogTitle="语义解析"/>
+
+        <ListPreference
+                android:key="infile"
+                android:entries="@array/infile_list"
+                android:entryValues="@array/infile_list"
+                android:title="外部音频"
+                android:summary=""
+                android:defaultValue="@string/sample_default"
+                android:dialogTitle="外部音频"/>
+
+        <CheckBoxPreference
+                android:defaultValue="false"
+                android:key="outfile"
+                android:summary="默认路径为/sdcard/outfile.pcm"
+                android:title="保存录音"/>
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="grammar"
+            android:summary="默认语法为 assets:///baidu_speech_grammar.bsg"
+            android:title="离线识别"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="高级">
+
+        <ListPreference
+                android:key="sample"
+                android:entries="@array/sample_list"
+                android:entryValues="@array/sample_list"
+                android:title="采样率"
+                android:summary=""
+                android:defaultValue="@string/sample_default"
+                android:dialogTitle="采样率"/>
+        <ListPreference
+                android:key="vad"
+                android:entries="@array/vad_list"
+                android:entryValues="@array/vad_list"
+                android:title="VAD"
+                android:summary=""
+                android:defaultValue="@string/vad_default"
+                android:dialogTitle="VAD"/>
+        <ListPreference
+                android:key="language"
+                android:entries="@array/language"
+                android:entryValues="@array/language"
+                android:title="语种"
+                android:summary=""
+                android:defaultValue="@string/language_default"
+                android:dialogTitle="语种"/>
+
+        <ListPreference
+                android:key="prop"
+                android:entries="@array/prop_tpye"
+                android:entryValues="@array/prop_tpye"
+                android:title="垂直领域"
+                android:summary=""
+                android:defaultValue="@string/prop_default"
+                android:dialogTitle="垂直领域"/>
+
+    </PreferenceCategory>
+</PreferenceScreen>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">百度语音示例(2.x)</string>
+    <string name="please_speak">请说话</string>
+    <string name="speaking">说话中</string>
+    <string name="cancel">取消</string>
+    <string name="start">开始</string>
+    <string name="setting">设置</string>
+
+
+    <string name="infile_default"></string>
+    <string-array name="infile_list">
+        <item>@string/infile_default</item>
+        <item>res:///com/baidu/android/voicedemo/8k_test.pcm, 8k采样的测试音频</item>
+        <item>res:///com/baidu/android/voicedemo/16k_test.pcm, 16k采样的测试音频</item>
+    </string-array>
+
+    <string name="sample_default"></string>
+    <string-array name="sample_list">
+        <item>@string/sample_default</item>
+        <item>8000, 适用于2G或3G网络</item>
+        <item>16000, 适用于4G或WIFI网络</item>
+    </string-array>
+
+    <string name="language_default"></string>
+    <string-array name="language">
+        <item>@string/language_default</item>
+        <item>cmn-Hans-CN, 普通话(中国)</item>
+        <item>sichuan-Hans-CN, 四川(中国)</item>
+        <item>yue-Hans-CN, 粤语(中国)</item>
+        <item>en-GB, 英语(美国)</item>
+    </string-array>
+
+    <string name="nlu_default"></string>
+    <string-array name="nlu_list">
+        <item>@string/nlu_default</item>
+        <item>disable, 禁用语义解析</item>
+        <item>enable, 开启语义解析</item>
+    </string-array>
+
+    <string name="vad_default"></string>
+    <string-array name="vad_list">
+        <item>@string/vad_default</item>
+        <item>search, 适用输入搜索关键字(默认值)</item>
+        <item>input, 适用于输入短信、微博等长句输入</item>
+        <item>model-vad, 抗噪声能力强, 但需要依赖较大的资源包</item>
+    </string-array>
+    <string name="prop_default"></string>
+    <string-array name="prop_tpye">
+        <item>@string/prop_default</item>
+        <item>20000, 输入</item>
+        <item>10005, 热词</item>
+        <item>10060, 地图</item>
+        <item>10001, 音乐</item>
+        <item>10002, 视频</item>
+        <item>10003, 应用</item>
+        <item>10004, 网页</item>
+        <item>10007, 健康</item>
+        <item>10006, 购物</item>
+        <item>10008, 打电话</item>
+        <item>10008, 超级电话</item>
+        <item>10052, 医疗</item>
+        <item>10053, 汽车</item>
+        <item>10054, 娱乐餐饮</item>
+        <item>10055, 财经</item>
+        <item>10056, 游戏</item>
+        <item>10057, 菜谱</item>
+        <item>10058, 助手</item>
+        <item>100014, 联系人</item>
+        <item>100016, 手机设置</item>
+        <item>100018, 电视指令</item>
+        <item>100019, 播放器指令</item>
+        <item>100020, 收音机指令</item>
+        <item>100021, 命令词</item>
+    </string-array>
+</resources>

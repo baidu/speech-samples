@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:key="root_screen">
+
+    <Preference android:title="普通模式" >
+        <intent
+                android:targetPackage="com.baidu.speech.recognizerdemo"
+                android:targetClass="com.baidu.android.voicedemo.ApiActivity" >
+        </intent>
+    </Preference>
+    <Preference android:title="点按模式" >
+        <intent
+                android:targetPackage="com.baidu.speech.recognizerdemo"
+                android:targetClass="com.baidu.android.voicedemo.ActivityTouch" >
+        </intent>
+    </Preference>
+    <Preference android:title="原始接口" >
+        <intent
+                android:targetPackage="com.baidu.speech.recognizerdemo"
+                android:targetClass="com.baidu.android.voicedemo.ActivityConsole" >
+        </intent>
+    </Preference>
+    <Preference android:title="唤醒" >
+        <intent
+                android:targetPackage="com.baidu.speech.recognizerdemo"
+                android:targetClass="com.baidu.android.voicedemo.ActivityWakeUp" >
+        </intent>
+    </Preference>
+    <Preference android:title="词条上传" >
+        <intent
+                android:targetPackage="com.baidu.speech.recognizerdemo"
+                android:targetClass="com.baidu.android.voicedemo.SlotActivity" >
+        </intent>
+    </Preference>
+    <Preference android:title="兼容接口测试" >
+        <intent
+                android:targetPackage="com.baidu.speech.recognizerdemo"
+                android:targetClass="com.baidu.android.compatible.ui.CompatibleActivity" >
+        </intent>
+    </Preference>
+</PreferenceScreen>

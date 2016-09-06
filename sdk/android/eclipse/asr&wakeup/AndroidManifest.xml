@@ -1,0 +1,118 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.baidu.speech.recognizerdemo"
+    android:versionCode="1"
+    android:versionName="1.0">
+
+    <uses-sdk
+        android:minSdkVersion="15"
+        android:targetSdkVersion="21" />
+
+    <instrumentation
+            android:name="android.test.InstrumentationTestRunner"
+            android:targetPackage="com.baidu.speech.recognizerdemo"
+            android:label="Tests for com.baidu.speech.recognizerdemo" />
+
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <application
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name">
+
+        <!-- begin: baidu speech sdk-->
+        <!--
+            离线功能指南：
+            1. 在百度语音开放平台注册应用，http://yuyin.baidu.com/app
+            2. 为您的应用的“申请离线授权页面”，填写程序包名
+            3. 在当前应用的AndroidManifest.xml中填写相应的APP_ID（或在代码中设置appid参数）
+            4. 根据场景下载并集成相应的资源，见http://yuyin.baidu.com/docs/asr/131和http://yuyin.baidu.com/asr/download
+
+            另外需要注意的是离线功能只是在线功能的“增强”，不能永久不联网使用（特别是首次使用）。
+        -->
+        <!-- 请填写真实的APP_ID API_KEY SECRET_KEY -->
+        <meta-data android:name="com.baidu.speech.APP_ID" android:value="6536447"/>
+        <meta-data android:name="com.baidu.speech.API_KEY" android:value="8MAxI5o7VjKSZOKeBzS4XtxO"/>
+        <meta-data android:name="com.baidu.speech.SECRET_KEY" android:value="Ge5GXVdGQpaxOmLzc8fOM8309ATCz9Ha"/>
+		<service android:name="com.baidu.speech.VoiceRecognitionService" android:exported="false" />
+        <activity
+                android:name="com.baidu.voicerecognition.android.ui.BaiduASRDigitalDialog"
+                android:configChanges="orientation|keyboardHidden|screenLayout"
+                android:theme="@android:style/Theme.Dialog"
+                android:exported="false"
+                android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="com.baidu.action.RECOGNIZE_SPEECH" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <!-- end : baidu speech sdk-->
+
+        <activity
+                android:name="com.baidu.android.voicedemo.ActivityMain"
+                android:configChanges="orientation|keyboardHidden|screenLayout"
+                android:theme="@android:style/Theme.DeviceDefault.Light"
+                android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+                android:name="com.baidu.android.voicedemo.ApiActivity"
+                android:label="普通模式(API方式和UI方式)"
+                android:configChanges="orientation|keyboardHidden|screenLayout"
+                android:theme="@android:style/Theme.DeviceDefault.Light"
+                android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="com.baidu.speech.recognizerdemo.intent.category.SAMPLE_CODE" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.baidu.android.voicedemo.ActivityWakeUp"
+            android:label="语义唤醒"
+            android:configChanges="orientation|keyboardHidden|screenLayout"
+            android:theme="@android:style/Theme.DeviceDefault.Light"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="com.baidu.speech.recognizerdemo.intent.category.SAMPLE_CODE" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.baidu.android.voicedemo.ActivityOffline"
+            android:label="离线语法"
+            android:configChanges="orientation|keyboardHidden|screenLayout"
+            android:theme="@android:style/Theme.DeviceDefault.Light"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="com.baidu.speech.recognizerdemo.intent.category.SAMPLE_CODE" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.baidu.android.voicedemo.Setting"
+            android:label="设置"
+            android:configChanges="orientation|keyboardHidden|screenLayout"
+            android:theme="@android:style/Theme.DeviceDefault.Light"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="com.baidu.speech.asr.demo.setting" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <!---->
+
+        <uses-library android:name="android.test.runner" />
+    </application>
+
+</manifest>
