@@ -98,6 +98,18 @@
                 <category android:name="com.baidu.speech.recognizerdemo.intent.category.SAMPLE_CODE" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.baidu.android.voicedemo.ActivityLongSpeech"
+            android:label="长语音"
+            android:configChanges="orientation|keyboardHidden|screenLayout"
+            android:theme="@android:style/Theme.DeviceDefault.Light"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="com.baidu.speech.recognizerdemo.intent.category.SAMPLE_CODE" />
+            </intent-filter>
+        </activity>
 
         <activity
             android:name="com.baidu.android.voicedemo.Setting"
