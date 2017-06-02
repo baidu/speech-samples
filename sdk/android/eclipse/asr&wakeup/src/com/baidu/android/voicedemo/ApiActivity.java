@@ -5,6 +5,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,7 +16,9 @@ import android.speech.SpeechRecognizer;
 import android.util.Log;
 import android.view.View;
 import android.widget.*;
-import com.baidu.speech.VoiceRecognitionService;
+import com.baidu.speech.*;
+import com.baidu.speech.asr.SpeechConstant;
+import com.baidu.speech.core.BDSParamBase;
 import com.baidu.speech.recognizerdemo.R;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,7 +26,7 @@ import org.json.JSONObject;
 
 import java.util.*;
 
-public class ApiActivity extends Activity implements RecognitionListener {
+public class ApiActivity extends Activity {
     private static final String TAG = "Sdk2Api";
     private static final int REQUEST_UI = 1;
     private TextView txtLog;
@@ -34,7 +38,7 @@ public class ApiActivity extends Activity implements RecognitionListener {
     public static final int STATUS_Ready = 3;
     public static final int STATUS_Speaking = 4;
     public static final int STATUS_Recognition = 5;
-    private SpeechRecognizer speechRecognizer;
+    private EventManager asr;
     private int status = STATUS_None;
     private TextView txtResult;
     private long speechEndTime = -1;
@@ -48,9 +52,134 @@ public class ApiActivity extends Activity implements RecognitionListener {
         txtLog = (TextView) findViewById(R.id.txtLog);
         btn = (Button) findViewById(R.id.btn);
         setting = (Button) findViewById(R.id.setting);
-        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this, new ComponentName(this, VoiceRecognitionService.class));
 
-        speechRecognizer.setRecognitionListener(this);
+        // ########### 识别功能 ###########
+        // 1) 通过工厂创建语音识别的事件管理器
+        asr = EventManagerFactory.create(this, "asr");
+
+        // 2) 注册输出事件的监听器
+        asr.registerListener(new com.baidu.speech.EventListener() {
+
+            String mAsrResult = "";
+            String mAsrTemp = ""; // 临时识别结果
+
+            @Override
+            public void onEvent(String name, String params, byte[] data, int offset, int length) {
+                if (name.equals(SpeechConstant.CALLBACK_EVENT_ASR_READY)) {
+                    // 引擎就绪，可以说话，一般在收到此事件后通过UI通知用户可以说话了
+                    status = STATUS_Ready;
+                    print("准备就绪，可以开始说话");
+                }
+                if (name.equals(SpeechConstant.CALLBACK_EVENT_ASR_BEGIN)) {
+                    // SDK已经检测到用户在说话
+                    time = System.currentTimeMillis();
+                    status = STATUS_Speaking;
+                    btn.setText("说完了");
+                    print("检测到用户的已经开始说话");
+                }
+                if (name.equals(SpeechConstant.CALLBACK_EVENT_ASR_VOLUME)) {
+                    // 音量回调
+                }
+                if (name.equals(SpeechConstant.CALLBACK_EVENT_ASR_AUDIO)) {
+                    // 音频回调
+                }
+                if (name.equals(SpeechConstant.CALLBACK_EVENT_ASR_END)) {
+                    // SDK已经检测到用户在说话
+                    speechEndTime = System.currentTimeMillis();
+                    status = STATUS_Recognition;
+                    print("检测到用户的已经停止说话");
+                    btn.setText("识别中");
+                }
+                if (name.equals(SpeechConstant.CALLBACK_EVENT_ASR_PARTIAL)) {
+                    // 临时识别结果, 长语音模式需要从此消息中取出结果
+                    try {
+                        final JSONObject json = new JSONObject(params);
+                        final String result_type = json.getString("result_type");
+                        final String best_result = json.getJSONArray("results_recognition").getString(0);
+
+                        print(name + ": " + json.toString(4));
+
+                        if ("partial_result".equals(result_type)) {
+                            print("~临时识别结果：" + best_result);
+                            txtResult.setText(best_result);
+                        } else if ("final_result".equals(result_type)) {
+                        }
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (name.equals(SpeechConstant.CALLBACK_EVENT_ASR_FINISH)) {
+                    // 识别结束
+                    try {
+                        JSONObject json = new JSONObject(params);
+                        int error = json.optInt("error");
+                        if (error == 0) {
+                            long end2finish = System.currentTimeMillis() - speechEndTime;
+                            status = STATUS_None;
+                            String best_result = json.getJSONArray(SpeechRecognizer.RESULTS_RECOGNITION).getString(0);
+
+                            print("识别成功：" + best_result);
+                            String json_res = json.optString("origin_result");
+                            try {
+                                print("origin_result=\n" + new JSONObject(json_res).toString(4));
+                            } catch (Exception e) {
+                                print("origin_result=[warning: bad json]\n" + json_res);
+                            }
+                            btn.setText("开始");
+                            String strEnd2Finish = "";
+                            if (end2finish < 60 * 1000) {
+                                strEnd2Finish = "(waited " + end2finish + "ms)";
+                            }
+                            txtResult.setText(best_result + strEnd2Finish);
+                            time = 0;
+                        } else {
+                            time = 0;
+                            status = STATUS_None;
+                            StringBuilder sb = new StringBuilder();
+                            switch (error) {
+                                case SpeechRecognizer.ERROR_AUDIO:
+                                    sb.append("音频问题");
+                                    break;
+                                case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
+                                    sb.append("没有语音输入");
+                                    break;
+                                case SpeechRecognizer.ERROR_CLIENT:
+                                    sb.append("其它客户端错误");
+                                    break;
+                                case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS:
+                                    sb.append("权限不足");
+                                    break;
+                                case SpeechRecognizer.ERROR_NETWORK:
+                                    sb.append("网络问题");
+                                    break;
+                                case SpeechRecognizer.ERROR_NO_MATCH:
+                                    sb.append("没有匹配的识别结果");
+                                    break;
+                                case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
+                                    sb.append("引擎忙");
+                                    break;
+                                case SpeechRecognizer.ERROR_SERVER:
+                                    sb.append("服务端错误");
+                                    break;
+                                case SpeechRecognizer.ERROR_NETWORK_TIMEOUT:
+                                    sb.append("连接超时");
+                                    break;
+                                default:
+                                    sb.append("其它错误, 请对照错误和错误描述");
+                                    break;
+                            }
+                            sb.append(":" + error);
+                            print("识别失败：" + sb.toString());
+                            btn.setText("开始");
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                // ... 支持的输出事件和事件支持的事件参数见“输出事件”一节
+            }
+        });
         setting.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -100,85 +229,71 @@ public class ApiActivity extends Activity implements RecognitionListener {
         });
     }
 
-    @Override
-    protected void onDestroy() {
-        speechRecognizer.destroy();
-        super.onDestroy();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK) {
-            onResults(data.getExtras());
-        }
-    }
-
-    public void bindParams(Intent intent) {
+    public void bindParams(HashMap intent) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         if (sp.getBoolean("tips_sound", true)) {
-            intent.putExtra(Constant.EXTRA_SOUND_START, R.raw.bdspeech_recognition_start);
-            intent.putExtra(Constant.EXTRA_SOUND_END, R.raw.bdspeech_speech_end);
-            intent.putExtra(Constant.EXTRA_SOUND_SUCCESS, R.raw.bdspeech_recognition_success);
-            intent.putExtra(Constant.EXTRA_SOUND_ERROR, R.raw.bdspeech_recognition_error);
-            intent.putExtra(Constant.EXTRA_SOUND_CANCEL, R.raw.bdspeech_recognition_cancel);
+            intent.put(Constant.EXTRA_SOUND_START, R.raw.bdspeech_recognition_start);
+            intent.put(Constant.EXTRA_SOUND_END, R.raw.bdspeech_speech_end);
+            intent.put(Constant.EXTRA_SOUND_SUCCESS, R.raw.bdspeech_recognition_success);
+            intent.put(Constant.EXTRA_SOUND_ERROR, R.raw.bdspeech_recognition_error);
+            intent.put(Constant.EXTRA_SOUND_CANCEL, R.raw.bdspeech_recognition_cancel);
         }
         if (sp.contains(Constant.EXTRA_INFILE)) {
             String tmp = sp.getString(Constant.EXTRA_INFILE, "").replaceAll(",.*", "").trim();
-            intent.putExtra(Constant.EXTRA_INFILE, tmp);
+            intent.put(Constant.EXTRA_INFILE, tmp);
         }
         if (sp.getBoolean(Constant.EXTRA_OUTFILE, false)) {
-            intent.putExtra(Constant.EXTRA_OUTFILE, "sdcard/outfile.pcm");
+            intent.put(Constant.EXTRA_OUTFILE, "sdcard/outfile.pcm");
         }
         if (sp.getBoolean(Constant.EXTRA_GRAMMAR, false)) {
-            intent.putExtra(Constant.EXTRA_GRAMMAR, "assets:///baidu_speech_grammar.bsg");
+            intent.put(Constant.EXTRA_GRAMMAR, "assets:///baidu_speech_grammar.bsg");
         }
         if (sp.contains(Constant.EXTRA_SAMPLE)) {
             String tmp = sp.getString(Constant.EXTRA_SAMPLE, "").replaceAll(",.*", "").trim();
             if (null != tmp && !"".equals(tmp)) {
-                intent.putExtra(Constant.EXTRA_SAMPLE, Integer.parseInt(tmp));
+                intent.put(Constant.EXTRA_SAMPLE, Integer.parseInt(tmp));
             }
         }
         if (sp.contains(Constant.EXTRA_LANGUAGE)) {
             String tmp = sp.getString(Constant.EXTRA_LANGUAGE, "").replaceAll(",.*", "").trim();
             if (null != tmp && !"".equals(tmp)) {
-                intent.putExtra(Constant.EXTRA_LANGUAGE, tmp);
+                intent.put(Constant.EXTRA_LANGUAGE, tmp);
             }
         }
         if (sp.contains(Constant.EXTRA_NLU)) {
             String tmp = sp.getString(Constant.EXTRA_NLU, "").replaceAll(",.*", "").trim();
             if (null != tmp && !"".equals(tmp)) {
-                intent.putExtra(Constant.EXTRA_NLU, tmp);
+                intent.put(Constant.EXTRA_NLU, tmp);
             }
         }
 
         if (sp.contains(Constant.EXTRA_VAD)) {
             String tmp = sp.getString(Constant.EXTRA_VAD, "").replaceAll(",.*", "").trim();
             if (null != tmp && !"".equals(tmp)) {
-                intent.putExtra(Constant.EXTRA_VAD, tmp);
+                intent.put(Constant.EXTRA_VAD, tmp);
             }
         }
         String prop = null;
         if (sp.contains(Constant.EXTRA_PROP)) {
             String tmp = sp.getString(Constant.EXTRA_PROP, "").replaceAll(",.*", "").trim();
             if (null != tmp && !"".equals(tmp)) {
-                intent.putExtra(Constant.EXTRA_PROP, Integer.parseInt(tmp));
+                intent.put(Constant.EXTRA_PROP, Integer.parseInt(tmp));
                 prop = tmp;
             }
         }
 
         // offline asr
         {
-            intent.putExtra(Constant.EXTRA_OFFLINE_ASR_BASE_FILE_PATH, "/sdcard/easr/s_1");
+            intent.put(Constant.EXTRA_OFFLINE_ASR_BASE_FILE_PATH, "/sdcard/easr/s_1");
             if (null != prop) {
                 int propInt = Integer.parseInt(prop);
                 if (propInt == 10060) {
-                    intent.putExtra(Constant.EXTRA_OFFLINE_LM_RES_FILE_PATH, "/sdcard/easr/s_2_Navi");
+                    intent.put(Constant.EXTRA_OFFLINE_LM_RES_FILE_PATH, "/sdcard/easr/s_2_Navi");
                 } else if (propInt == 20000) {
-                    intent.putExtra(Constant.EXTRA_OFFLINE_LM_RES_FILE_PATH, "/sdcard/easr/s_2_InputMethod");
+                    intent.put(Constant.EXTRA_OFFLINE_LM_RES_FILE_PATH, "/sdcard/easr/s_2_InputMethod");
                 }
             }
-            intent.putExtra(Constant.EXTRA_OFFLINE_SLOT_DATA, buildTestSlotData());
+            intent.put(Constant.EXTRA_OFFLINE_SLOT_DATA, buildTestSlotData());
         }
     }
 
@@ -204,153 +319,59 @@ public class ApiActivity extends Activity implements RecognitionListener {
     private void start() {
         txtLog.setText("");
         print("点击了“开始”");
-        Intent intent = new Intent();
+        HashMap intent = new HashMap();
         bindParams(intent);
+
+        // 认证相关(BEGIN), key, TODO v3 SDK尚不支持从请在AndroidManifest.xml中直接读取key 和 secret, 为了兼容在此加入补丁代码
+        try {
+            final ApplicationInfo appInfo = getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
+            final String configKey = appInfo.metaData.getString("com.baidu.speech.API_KEY");
+            final String configSecret = appInfo.metaData.getString("com.baidu.speech.SECRET_KEY");
+            intent.put("key", configKey); // 认证相关, key, 从开放平台(http://yuyin.baidu.com)中获取的key
+            intent.put("secret", configSecret); // 认证相关, secret, 从开放平台(http://yuyin.baidu.com)secret
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "请在AndroidManifest.xml中参考文档或demo配置认证信息", Toast.LENGTH_LONG).show();
+            return;
+        }
+        // 认证相关(END)
+
+        intent.put("dec-type", 0); // SDK的协议号, 0=分包协议, 1=流失协议。TODO 目前需要强制设置为0启动分包协议
+        intent.put("log_level", 6); // 打开日志, 不设置则为关闭
+        intent.put("decoder", 0); // 使用纯在线识别
+        intent.put("vad", "dnn"); // 开启基于dnn的语音活动检测模块
+
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         {
 
             String args = sp.getString("args", "");
             if (null != args) {
                 print("参数集：" + args);
-                intent.putExtra("args", args);
+                intent.put("args", args);
             }
         }
         boolean api = sp.getBoolean("api", false);
         if (api) {
             speechEndTime = -1;
-            speechRecognizer.startListening(intent);
+
+            asr.send(SpeechConstant.ASR_CANCEL, "{}", null, 0, 0);
+            asr.send(SpeechConstant.ASR_START, new JSONObject(intent).toString(), null, 0, 0);
         } else {
-            intent.setAction("com.baidu.action.RECOGNIZE_SPEECH");
-            startActivityForResult(intent, REQUEST_UI);
+            Toast.makeText(this, "v3版本暂不支持UI模式, 请在设置中取消api参数的勾选", Toast.LENGTH_SHORT).show();
         }
 
         txtResult.setText("");
     }
 
     private void stop() {
-        speechRecognizer.stopListening();
+        asr.send(SpeechConstant.ASR_STOP, "{}", null, 0, 0);
         print("点击了“说完了”");
     }
 
     private void cancel() {
-        speechRecognizer.cancel();
+        asr.send(SpeechConstant.ASR_CANCEL, "{}", null, 0, 0);
         status = STATUS_None;
         print("点击了“取消”");
-    }
-
-    @Override
-    public void onReadyForSpeech(Bundle params) {
-        status = STATUS_Ready;
-        print("准备就绪，可以开始说话");
-    }
-
-    @Override
-    public void onBeginningOfSpeech() {
-        time = System.currentTimeMillis();
-        status = STATUS_Speaking;
-        btn.setText("说完了");
-        print("检测到用户的已经开始说话");
-    }
-
-    @Override
-    public void onRmsChanged(float rmsdB) {
-
-    }
-
-    @Override
-    public void onBufferReceived(byte[] buffer) {
-
-    }
-
-    @Override
-    public void onEndOfSpeech() {
-        speechEndTime = System.currentTimeMillis();
-        status = STATUS_Recognition;
-        print("检测到用户的已经停止说话");
-        btn.setText("识别中");
-    }
-
-    @Override
-    public void onError(int error) {
-        time = 0;
-        status = STATUS_None;
-        StringBuilder sb = new StringBuilder();
-        switch (error) {
-            case SpeechRecognizer.ERROR_AUDIO:
-                sb.append("音频问题");
-                break;
-            case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
-                sb.append("没有语音输入");
-                break;
-            case SpeechRecognizer.ERROR_CLIENT:
-                sb.append("其它客户端错误");
-                break;
-            case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS:
-                sb.append("权限不足");
-                break;
-            case SpeechRecognizer.ERROR_NETWORK:
-                sb.append("网络问题");
-                break;
-            case SpeechRecognizer.ERROR_NO_MATCH:
-                sb.append("没有匹配的识别结果");
-                break;
-            case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
-                sb.append("引擎忙");
-                break;
-            case SpeechRecognizer.ERROR_SERVER:
-                sb.append("服务端错误");
-                break;
-            case SpeechRecognizer.ERROR_NETWORK_TIMEOUT:
-                sb.append("连接超时");
-                break;
-        }
-        sb.append(":" + error);
-        print("识别失败：" + sb.toString());
-        btn.setText("开始");
-    }
-
-    @Override
-    public void onResults(Bundle results) {
-        long end2finish = System.currentTimeMillis() - speechEndTime;
-        status = STATUS_None;
-        ArrayList<String> nbest = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-        print("识别成功：" + Arrays.toString(nbest.toArray(new String[nbest.size()])));
-        String json_res = results.getString("origin_result");
-        try {
-            print("origin_result=\n" + new JSONObject(json_res).toString(4));
-        } catch (Exception e) {
-            print("origin_result=[warning: bad json]\n" + json_res);
-        }
-        btn.setText("开始");
-        String strEnd2Finish = "";
-        if (end2finish < 60 * 1000) {
-            strEnd2Finish = "(waited " + end2finish + "ms)";
-        }
-        txtResult.setText(nbest.get(0) + strEnd2Finish);
-        time = 0;
-    }
-
-    @Override
-    public void onPartialResults(Bundle partialResults) {
-        ArrayList<String> nbest = partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-        if (nbest.size() > 0) {
-            print("~临时识别结果：" + Arrays.toString(nbest.toArray(new String[0])));
-            txtResult.setText(nbest.get(0));
-        }
-    }
-
-    @Override
-    public void onEvent(int eventType, Bundle params) {
-        switch (eventType) {
-            case EVENT_ERROR:
-                String reason = params.get("reason") + "";
-                print("EVENT_ERROR, " + reason);
-                break;
-            case VoiceRecognitionService.EVENT_ENGINE_SWITCH:
-                int type = params.getInt("engine_type");
-                print("*引擎切换至" + (type == 0 ? "在线" : "离线"));
-                break;
-        }
     }
 
     long time;
