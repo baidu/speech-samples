@@ -241,6 +241,7 @@ public class ApiActivity extends Activity {
         if (sp.contains(Constant.EXTRA_INFILE)) {
             String tmp = sp.getString(Constant.EXTRA_INFILE, "").replaceAll(",.*", "").trim();
             intent.put(Constant.EXTRA_INFILE, tmp);
+            intent.put("accept-audio-data", true); // TODO v3 sdk需要此参数来保证数据回传
         }
         if (sp.getBoolean(Constant.EXTRA_OUTFILE, false)) {
             intent.put(Constant.EXTRA_OUTFILE, "sdcard/outfile.pcm");
