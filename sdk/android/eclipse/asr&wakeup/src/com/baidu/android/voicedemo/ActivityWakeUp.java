@@ -2,6 +2,7 @@ package com.baidu.android.voicedemo;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.view.View;
@@ -56,7 +57,7 @@ public class ActivityWakeUp extends Activity {
             public void onEvent(String name, String params, byte[] data, int offset, int length) {
                 Log.d(TAG, String.format("event: name=%s, params=%s", name, params));
                 try {
-                    JSONObject json = new JSONObject(params);
+                    JSONObject json = new JSONObject(TextUtils.isEmpty(params) ? "{}" : params);
                     if ("wp.data".equals(name)) { // 每次唤醒成功, 将会回调name=wp.data的时间, 被激活的唤醒词在params的word字段
                         String word = json.getString("word");
                         txtLog.append("唤醒成功, 唤醒词: " + word + "\r\n");
