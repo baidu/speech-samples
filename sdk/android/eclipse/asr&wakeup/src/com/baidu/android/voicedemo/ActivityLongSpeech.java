@@ -4,12 +4,15 @@
 package com.baidu.android.voicedemo;
 
 import android.app.Activity;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.baidu.speech.EventListener;
 import com.baidu.speech.EventManager;
 import com.baidu.speech.EventManagerFactory;
@@ -107,9 +110,20 @@ public class ActivityLongSpeech extends Activity {
 
     private void start() {
         HashMap intent = new HashMap();
-        intent.put("pid", your pid); // 认证相关： pid
-        intent.put("key", your key); // 认证相关： 与pid对应
-        intent.put("url", your url); // 认证相关： 接入地址
+        // 认证相关(BEGIN), key, TODO v3 SDK尚不支持从请在AndroidManifest.xml中直接读取key 和 secret, 为了兼容在此加入补丁代码
+        try {
+            final ApplicationInfo appInfo = getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
+            final Object configAppId = appInfo.metaData.get("com.baidu.speech.APP_ID");
+            final Object configKey = appInfo.metaData.getString("com.baidu.speech.API_KEY");
+            intent.put(SpeechConstant.APP_ID, configAppId); // 认证相关, key, 从开放平台(http://yuyin.baidu.com)中获取的key
+            intent.put("apikey", configKey); // 认证相关, apikey, 从开放平台(http://yuyin.baidu.com)中获取的key
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "请在AndroidManifest.xml中参考文档或demo配置认证信息", Toast.LENGTH_LONG).show();
+            return;
+        }
+        // 认证相关(END)
+        intent.put("auth", false);
         intent.put("dec-type", 1);
         intent.put("log_level", 6);
         intent.put("decoder", 0);
