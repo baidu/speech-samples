@@ -326,10 +326,10 @@ public class ApiActivity extends Activity {
         // 认证相关(BEGIN), key, TODO v3 SDK尚不支持从请在AndroidManifest.xml中直接读取key 和 secret, 为了兼容在此加入补丁代码
         try {
             final ApplicationInfo appInfo = getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
-            final String configKey = appInfo.metaData.getString("com.baidu.speech.API_KEY");
-            final String configSecret = appInfo.metaData.getString("com.baidu.speech.SECRET_KEY");
-            intent.put("key", configKey); // 认证相关, key, 从开放平台(http://yuyin.baidu.com)中获取的key
-            intent.put("secret", configSecret); // 认证相关, secret, 从开放平台(http://yuyin.baidu.com)secret
+            final Object configAppId = appInfo.metaData.get("com.baidu.speech.APP_ID");
+            final Object configKey = appInfo.metaData.getString("com.baidu.speech.API_KEY");
+            intent.put(SpeechConstant.APP_ID, configAppId); // 认证相关, key, 从开放平台(http://yuyin.baidu.com)中获取的key
+            intent.put("apikey", configKey); // 认证相关, apikey, 从开放平台(http://yuyin.baidu.com)中获取的key
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(this, "请在AndroidManifest.xml中参考文档或demo配置认证信息", Toast.LENGTH_LONG).show();
@@ -337,10 +337,12 @@ public class ApiActivity extends Activity {
         }
         // 认证相关(END)
 
-        intent.put("dec-type", 0); // SDK的协议号, 0=分包协议, 1=流失协议。TODO 目前需要强制设置为0启动分包协议
+        intent.put("dec-type", 1); // SDK的协议号, 0=分包协议, 1=流式协议。TODO 目前需要强制设置为0启动分包协议
         intent.put("log_level", 6); // 打开日志, 不设置则为关闭
         intent.put("decoder", 0); // 使用纯在线识别
         intent.put("vad", "dnn"); // 开启基于dnn的语音活动检测模块
+        intent.put("auth", false); // TODO 开启流失协议时(即当dec-type设置为1时), 需要关闭非流式协议的认证
+//        intent.put(SpeechConstant.PID, 1932); // 设置产品ID, 见 https://github.com/baidu/speech-samples/wiki/docs-android-v3 2.3输入事件一节的PID参数
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         {
@@ -362,6 +364,11 @@ public class ApiActivity extends Activity {
         }
 
         txtResult.setText("");
+        try {
+            txtLog.append(new JSONObject(intent).toString(4));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     private void stop() {
