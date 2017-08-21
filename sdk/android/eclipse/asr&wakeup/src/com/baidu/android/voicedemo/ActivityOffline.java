@@ -12,6 +12,7 @@ import com.baidu.speech.EventManager;
 import com.baidu.speech.EventManagerFactory;
 import com.baidu.speech.asr.SpeechConstant;
 import com.baidu.speech.recognizerdemo.R;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -116,8 +117,30 @@ public class ActivityOffline extends Activity {
 
     public void bindParams(HashMap intent) {
         intent.put("grammar", "asset:///baidu_speech_grammar.bsg"); // 设置离线的授权文件(离线模块需要授权), 该语法可以用自定义语义工具生成, 链接http://yuyin.baidu.com/asr#m5
-        //intent.putExtra("slot-data", your slots); // 设置grammar中需要覆盖的词条,如联系人名
+//        intent.put("slot-data",buildTestSlotData()); // 设置grammar中需要覆盖的词条,如联系人名
         intent.put("decoder", 2); // decoder 可以设置解码器类型, 2=离在线混合识别详见文档
+//        intent.put("outfile", "/sdcard/test.pcm");
+//        intent.put("accept-audio-data", true); // TODO v3 sdk需要此参数来保证数据回传
+//        intent.put("infile", "/sdcard/test.pcm");
+    }
+
+    private String buildTestSlotData() {
+        JSONObject slotData = new JSONObject();
+        JSONArray name = new JSONArray().put("李涌泉").put("郭下纶");
+        JSONArray song = new JSONArray().put("七里香").put("发如雪");
+        JSONArray artist = new JSONArray().put("周杰伦").put("李世龙");
+        JSONArray app = new JSONArray().put("手机百度").put("百度地图");
+        JSONArray usercommand = new JSONArray().put("关灯").put("开门");
+        try {
+            slotData.put(Constant.EXTRA_OFFLINE_SLOT_NAME, name);
+            slotData.put(Constant.EXTRA_OFFLINE_SLOT_SONG, song);
+            slotData.put(Constant.EXTRA_OFFLINE_SLOT_ARTIST, artist);
+            slotData.put(Constant.EXTRA_OFFLINE_SLOT_APP, app);
+            slotData.put(Constant.EXTRA_OFFLINE_SLOT_USERCOMMAND, usercommand);
+        } catch (JSONException e) {
+
+        }
+        return slotData.toString();
     }
 
     private void start() {
