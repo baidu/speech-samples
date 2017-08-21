@@ -94,14 +94,16 @@ public class ApiActivity extends Activity {
                     // 临时识别结果, 长语音模式需要从此消息中取出结果
                     try {
                         final JSONObject json = new JSONObject(params);
-                        final String result_type = json.getString("result_type");
-                        final String best_result = json.getJSONArray("results_recognition").getString(0);
-
                         print(name + ": " + json.toString(4));
 
-                        if ("partial_result".equals(result_type)) {
+                        final String result_type = json.getString("result_type");
+                        if ("partial_result".equals(result_type)) { // 处理临时识别结果
+                            final String best_result = json.getJSONArray("results_recognition").getString(0);
                             print("~临时识别结果：" + best_result);
                             txtResult.setText(best_result);
+                        } else if ("nlu_result".equals(result_type)) { // 处理语义
+                            String nlu = new String(data, offset, length);
+                            print("~语义结果: " + nlu);
                         } else if ("final_result".equals(result_type)) {
                         }
 
@@ -117,7 +119,8 @@ public class ApiActivity extends Activity {
                         if (error == 0) {
                             long end2finish = System.currentTimeMillis() - speechEndTime;
                             status = STATUS_None;
-                            String best_result = json.getJSONArray(SpeechRecognizer.RESULTS_RECOGNITION).getString(0);
+//                            String best_result = json.getJSONArray(SpeechRecognizer.RESULTS_RECOGNITION).getString(0);
+                            String best_result = "";
 
                             print("识别成功：" + best_result);
                             String json_res = json.optString("origin_result");
@@ -341,8 +344,7 @@ public class ApiActivity extends Activity {
         intent.put("log_level", 6); // 打开日志, 不设置则为关闭
         intent.put("decoder", 0); // 使用纯在线识别
         intent.put("vad", "dnn"); // 开启基于dnn的语音活动检测模块
-        intent.put("auth", false); // TODO 开启流失协议时(即当dec-type设置为1时), 需要关闭非流式协议的认证
-//        intent.put(SpeechConstant.PID, 1932); // 设置产品ID, 见 https://github.com/baidu/speech-samples/wiki/docs-android-v3 2.3输入事件一节的PID参数
+        intent.put(SpeechConstant.PID, 15361); // 设置产品ID, 见 https://github.com/baidu/speech-samples/wiki/docs-android-v3 2.3输入事件一节的PID参数
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         {
