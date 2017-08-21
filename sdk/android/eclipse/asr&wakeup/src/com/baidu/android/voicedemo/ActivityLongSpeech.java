@@ -123,7 +123,6 @@ public class ActivityLongSpeech extends Activity {
             return;
         }
         // 认证相关(END)
-        intent.put("auth", false);
         intent.put("dec-type", 1);
         intent.put("log_level", 6);
         intent.put("decoder", 0);
