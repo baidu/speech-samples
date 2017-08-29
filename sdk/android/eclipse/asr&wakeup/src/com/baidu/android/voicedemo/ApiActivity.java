@@ -115,6 +115,10 @@ public class ApiActivity extends Activity {
                     // 识别结束
                     try {
                         JSONObject json = new JSONObject(params);
+
+                        int sub_error = json.optInt("sub_error");
+                        BugCat.cat(getApplicationContext(), sub_error); // 用辅助类BugCat进行错误原因分析
+
                         int error = json.optInt("error");
                         if (error == 0) {
                             long end2finish = System.currentTimeMillis() - speechEndTime;
