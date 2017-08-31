@@ -96,7 +96,7 @@ public class BugCat {
         }
     }
 
-    public static void cat(Context context, int error) {
+    public static String cat(Context context, int error) {
         String msg = mapping.get(error);
 
         msg += checkLibForModelVad(context);
@@ -105,6 +105,7 @@ public class BugCat {
         if (msg != null && msg.length() > 0) {
             Toast.makeText(context, BUG_CAT_VERSION + "\n" + msg, Toast.LENGTH_LONG).show();
         }
+        return msg;
     }
 
     static String checkLibForModelVad(Context context) {
