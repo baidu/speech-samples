@@ -76,7 +76,7 @@
         </activity>
         <activity
             android:name="com.baidu.android.voicedemo.ActivityWakeUp"
-            android:label="语义唤醒"
+            android:label="唤醒+识别(onshot)"
             android:configChanges="orientation|keyboardHidden|screenLayout"
             android:theme="@android:style/Theme.DeviceDefault.Light"
             android:screenOrientation="portrait">
