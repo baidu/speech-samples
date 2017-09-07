@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+        android:weightSum="4" >
+
+        <Button
+            android:id="@+id/getServerList"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:lines="2"
+            android:text="getServerList"
+            android:textSize="12dp" />
+
+        <Button
+            android:id="@+id/getLocalList"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:lines="2"
+            android:text="getLocalList"
+            android:textSize="12dp" />
+
+        <Button
+            android:id="@+id/getServerListAvailable"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:lines="2"
+            android:text="getServerListAvailable"
+            android:textSize="12dp" />
+
+        <Button
+            android:id="@+id/getLocalListAvailable"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:lines="2"
+            android:text="getLocalListAvailable"
+            android:textSize="12dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+        android:weightSum="4" >
+
+        <Button
+            android:id="@+id/getServerFileInfo"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:lines="2"
+            android:text="getServerFileInfo"
+            android:textSize="12dp" />
+
+        <Button
+            android:id="@+id/getLocalFileInfo"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:lines="2"
+            android:text="getLocalFileInfo"
+            android:textSize="12dp" />
+
+        <Button
+            android:id="@+id/getModelDefault"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:lines="2"
+            android:text="getModelDefault"
+            android:textSize="12dp" />
+
+        <Button
+            android:id="@+id/getModelFilePath"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:lines="2"
+            android:text="getModelFilePath"
+            android:textSize="12dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+        android:weightSum="4" >
+
+        <Button
+            android:id="@+id/downloadList"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:lines="2"
+            android:text="downloadList"
+            android:textSize="12dp" />
+
+        <Button
+            android:id="@+id/stop"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:lines="2"
+            android:text="stop"
+            android:textSize="12dp" />
+
+        <Button
+            android:id="@+id/useModel"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:lines="2"
+            android:text="useModel"
+            android:textSize="12dp" />
+
+        <Button
+            android:id="@+id/speak"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:lines="2"
+            android:text="speak"
+            android:textSize="12dp" />
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/input"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="input" />
+
+    <ListView
+        android:id="@+id/listview"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>
