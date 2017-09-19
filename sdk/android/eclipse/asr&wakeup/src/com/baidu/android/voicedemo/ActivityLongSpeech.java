@@ -22,12 +22,16 @@ import com.baidu.speech.recognizerdemo.R;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.HashMap;
 
 
 public class ActivityLongSpeech extends Activity {
 
     private static final String TAG = "ActivityLongSpeech";
+    private static final String TEST_PCM_INPUT_FILE = "/sdcard/test.pcm";
+    private static final String TEST_RESULT_TXT_FILE = "/sdcard/bds_result.txt";
     private EventManager asr;
 
     private TextView txtResult;
@@ -56,6 +60,7 @@ public class ActivityLongSpeech extends Activity {
             public void onEvent(String name, String params, byte[] data, int offset, int length) {
                 if (name.equals(SpeechConstant.CALLBACK_EVENT_ASR_READY)) {
                     // 引擎就绪，可以说话，一般在收到此事件后通过UI通知用户可以说话了
+                    Toast.makeText(ActivityLongSpeech.this, "引擎已经就绪, 若识别文件可能等待时间较长, 请耐心等待", Toast.LENGTH_LONG).show();
                 }
                 if (name.equals(SpeechConstant.CALLBACK_EVENT_ASR_PARTIAL)) {
                     // 临时识别结果, 长语音模式需要从此消息中取出结果
@@ -72,7 +77,15 @@ public class ActivityLongSpeech extends Activity {
                             mAsrResult += mAsrTemp;
                             mAsrTemp = "";
                         }
-                        txtResult.setText(mAsrResult + mAsrTemp);
+
+                        FileOutputStream out = new FileOutputStream(TEST_RESULT_TXT_FILE);
+                        out.write(mAsrResult.getBytes());
+                        out.close();
+                        String tmp  = mAsrResult + mAsrTemp;
+                        if (tmp.length() > 100) {
+                            tmp = tmp.substring(tmp.length() - 100);
+                        }
+                        txtResult.setText(tmp);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -115,8 +128,8 @@ public class ActivityLongSpeech extends Activity {
             final ApplicationInfo appInfo = getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
             final Object configAppId = appInfo.metaData.get("com.baidu.speech.APP_ID");
             final Object configKey = appInfo.metaData.getString("com.baidu.speech.API_KEY");
-            intent.put(SpeechConstant.APP_ID, configAppId); // 认证相关, key, 从开放平台(http://yuyin.baidu.com)中获取的key
-            intent.put("apikey", configKey); // 认证相关, apikey, 从开放平台(http://yuyin.baidu.com)中获取的key
+//            intent.put(SpeechConstant.APP_ID, configAppId); // 认证相关, key, 从开放平台(http://yuyin.baidu.com)中获取的key
+//            intent.put("apikey", configKey); // 认证相关, apikey, 从开放平台(http://yuyin.baidu.com)中获取的key
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(this, "请在AndroidManifest.xml中参考文档或demo配置认证信息", Toast.LENGTH_LONG).show();
@@ -128,6 +141,14 @@ public class ActivityLongSpeech extends Activity {
         intent.put("decoder", 0);
         intent.put("vad.endpoint-timeout", 0); // 0 = 长语音，不会自动停止
         intent.put("vad", "dnn");
+        intent.put("url", "http://audiotest.baidu.com/v2");
+        intent.put("key", "com.baidu.test");
+        intent.put("pid", -20);
+        if (!new File(TEST_PCM_INPUT_FILE).exists()) {
+            Toast.makeText(this, "未找到音频文件" + TEST_PCM_INPUT_FILE + "直接通过麦克风录音", Toast.LENGTH_LONG).show();
+        } else {
+            intent.put("infile", TEST_PCM_INPUT_FILE);
+        }
 
         asr.send(SpeechConstant.ASR_CANCEL, "{}", null, 0, 0);
         asr.send(SpeechConstant.ASR_START, new JSONObject(intent).toString(), null, 0, 0);
