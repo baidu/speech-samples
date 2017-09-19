@@ -74,6 +74,7 @@ public class ActivityLongSpeech extends Activity {
                         if ("partial_result".equals(result_type)) {
                             mAsrTemp = best_result;
                         } else if ("final_result".equals(result_type)) {
+                            mAsrTemp = best_result;
                             mAsrResult += mAsrTemp;
                             mAsrTemp = "";
                         }
@@ -103,21 +104,13 @@ public class ActivityLongSpeech extends Activity {
                 // ... 支持的输出事件和事件支持的事件参数见“输出事件”一节
             }
         });
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        // 3.1) 发送开始事件（可以通过键值对数组控制识别方式）
         start();
         print("已经启动长语音识别, 现在可以说话了, 请确保网络正常。");
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-
+    public void onBackPressed() {
+        super.onBackPressed();
         cancel();
     }
 
