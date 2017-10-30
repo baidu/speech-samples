@@ -9,7 +9,7 @@ public class FileAudioInputStream extends InputStream {
 
     FileInputStream in;
 
-    public static final float SPEED = 6;
+    public static final float SPEED = 2;
 
     FileAudioInputStream(String file) throws FileNotFoundException {
         in = new FileInputStream(file);

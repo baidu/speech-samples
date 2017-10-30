@@ -23,7 +23,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.HashMap;
 
 
@@ -36,6 +38,10 @@ public class ActivityLongSpeech extends Activity {
 
     private TextView txtResult;
     private TextView txtLog;
+
+    public static InputStream audio() throws FileNotFoundException {
+        return new FileAudioInputStream(TEST_PCM_INPUT_FILE);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,7 +146,7 @@ public class ActivityLongSpeech extends Activity {
         if (!new File(TEST_PCM_INPUT_FILE).exists()) {
             Toast.makeText(this, "未找到音频文件" + TEST_PCM_INPUT_FILE + "直接通过麦克风录音", Toast.LENGTH_LONG).show();
         } else {
-            intent.put("infile", TEST_PCM_INPUT_FILE);
+            intent.put("infile",  "#com.baidu.android.voicedemo.ActivityLongSpeech.audio()");
         }
 
         asr.send(SpeechConstant.ASR_CANCEL, "{}", null, 0, 0);

@@ -5,7 +5,7 @@
     <PreferenceCategory
             android:title="常用">
         <CheckBoxPreference
-                android:defaultValue="false"
+                android:defaultValue="true"
                 android:key="api"
                 android:title="使用API"
                 android:summary="可以通过两种方式使用SDK：无界面的API；有预定义界面的对话框"/>
