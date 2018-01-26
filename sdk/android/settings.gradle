@@ -1,0 +1,2 @@
+include ':asr-demo'
+project(':asr-demo').setProjectDir(new File('eclipse/asr&wakeup'))
