@@ -1,2 +1,5 @@
 include ':asr-demo'
 project(':asr-demo').setProjectDir(new File('eclipse/asr&wakeup'))
+
+include ':tts-demo'
+project(':tts-demo').setProjectDir(new File('eclipse/TTS/BaiduTtsSample'))
