@@ -169,10 +169,8 @@ public class Search {
 
         @Override
         public int compareTo(Object o) {
-            if (o instanceof Score) {
-                return score - ((Score) o).score;
-            }
-            return 0;
+            int x = score - ((Score) o).score;
+            return x == 0 ? -1 : x; // 即使相等，也返回不等的结果，强制区分大小
         }
 
         @Override
